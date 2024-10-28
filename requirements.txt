@@ -1,3 +1,4 @@
 Django
 sslcommerz_lib
 pillow
+gunicorn
