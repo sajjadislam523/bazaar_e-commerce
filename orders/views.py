@@ -86,9 +86,7 @@ class CheckoutSuccessView(View):
             send_email = EmailMessage(mail_subject, message, to=[to_email])
             send_email.send()
 
-            url = reverse('order_complete') + \
-                f'?order_id={order.order_number}&transaction_id={
-                    payment.payment_id}'
+            url = reverse('order_complete') + f'?order_id={order.order_number}&transaction_id={payment.payment_id}'
 
             return redirect(url)
 
