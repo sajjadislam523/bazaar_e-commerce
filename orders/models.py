@@ -2,16 +2,23 @@ from django.db import models
 from accounts.models import Account
 from store.models import Product
 
+
 class Payment(models.Model):
+    PAYMENT_METHODS = (
+        ('Card', 'Card'),
+        ('Cash on Delivery', 'Cash on Delivery')
+    )
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
     payment_id = models.CharField(max_length=100)
-    payment_method = models.CharField(max_length=100)
-    amount_paid = models.CharField(max_length=100) # this is the total amount paid
-    status = models.CharField(max_length=100)
+    payment_method = models.CharField(
+        max_length=100, choices=PAYMENT_METHODS, default='Cash on Delivery')
+    # this is the total amount paid
+    amount_paid = models.CharField(max_length=100)
+    status = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.payment_id
+        return f'{self.payment_method} - {self.payment_id or "N/A"}'
 
 
 class Order(models.Model):
@@ -23,7 +30,8 @@ class Order(models.Model):
     )
 
     user = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True)
-    payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, blank=True, null=True)
+    payment = models.ForeignKey(
+        Payment, on_delete=models.SET_NULL, blank=True, null=True)
     order_number = models.CharField(max_length=20)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
@@ -43,7 +51,6 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-
     def full_name(self):
         return f'{self.first_name} {self.last_name}'
 
@@ -56,7 +63,8 @@ class Order(models.Model):
 
 class OrderProduct(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, blank=True, null=True)
+    payment = models.ForeignKey(
+        Payment, on_delete=models.SET_NULL, blank=True, null=True)
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField()
@@ -68,13 +76,13 @@ class OrderProduct(models.Model):
     def __str__(self):
         return self.product.product_name
 
+
 class PaymentGatewaySettings(models.Model):
 
     store_id = models.CharField(max_length=500, blank=True, null=True)
     store_pass = models.CharField(max_length=500, blank=True, null=True)
-    
+
     class Meta:
         verbose_name = "PaymentGatewaySetting"
         verbose_name_plural = "PaymentGatewaySettings"
         db_table = "paymentgatewaysettings"
-

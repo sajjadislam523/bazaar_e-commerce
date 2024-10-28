@@ -1,3 +1,5 @@
+from .models import Order
+from django.shortcuts import redirect, render
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from cart.models import CartItem
@@ -13,7 +15,7 @@ from django.conf import settings
 from django.urls import reverse
 
 from django.shortcuts import render, redirect
-from django.http import HttpResponse 
+from django.http import HttpResponse
 from django.views.generic import View, TemplateView, DetailView
 from django.contrib import messages, auth
 from django.views.decorators.csrf import csrf_exempt
@@ -22,24 +24,27 @@ from accounts.models import Account
 from .models import Payment
 from .ssl import sslcommerz_payment_gateway
 
+
 @method_decorator(csrf_exempt, name='dispatch')
 class CheckoutSuccessView(View):
     model = Payment
     template_name = 'orders/success.html'
-    
+
     def post(self, request, *args, **kwargs):
 
         data = self.request.POST
-        try: 
-            user_id = int(data['value_a'])  # Retrieve the stored user ID as an integer
+        try:
+            # Retrieve the stored user ID as an integer
+            user_id = int(data['value_a'])
             user = Account.objects.get(pk=user_id)
-            order = Order.objects.get(user=user, is_ordered=False, order_number=data['value_b'])
+            order = Order.objects.get(
+                user=user, is_ordered=False, order_number=data['value_b'])
             payment = Payment(
-                user = user,
-                payment_id = data['tran_id'],
-                payment_method = data['card_type'],
-                amount_paid = order.order_total,
-                status = data['status'],
+                user=user,
+                payment_id=data['tran_id'],
+                payment_method=data['card_type'],
+                amount_paid=order.order_total,
+                status=data['status'],
             )
             payment.save()
 
@@ -81,40 +86,47 @@ class CheckoutSuccessView(View):
             send_email = EmailMessage(mail_subject, message, to=[to_email])
             send_email.send()
 
-            url = reverse('order_complete') + f'?order_id={order.order_number}&transaction_id={payment.payment_id}'
+            url = reverse('order_complete') + \
+                f'?order_id={order.order_number}&transaction_id={
+                    payment.payment_id}'
 
             return redirect(url)
 
         except:
-            messages.success(request,'Something Went Wrong')
-        
+            messages.success(request, 'Something Went Wrong')
+
         return render(request, 'orders/success.html')
 
 
 @method_decorator(csrf_exempt, name='dispatch')
 class CheckoutFaildView(View):
     template_name = 'failed.html'
+
     def get(self, request, *args, **kwargs):
         return render(request, self.template_name)
 
     def post(self, request, *args, **kwargs):
         return render(request, self.template_name)
 
-def place_order(request, total=0, quantity=0,):
+
+def place_order(request, total=0, quantity=0):
     current_user = request.user
     cart_items = CartItem.objects.filter(user=current_user)
     cart_count = cart_items.count()
+
+    # Redirect if cart is empty
     if cart_count <= 0:
         return redirect('store')
 
+    # Calculate total, tax, and grand total
     grand_total = 0
     tax = 0
     for cart_item in cart_items:
         total += (cart_item.product.price * cart_item.quantity)
         quantity += cart_item.quantity
-    tax = (2 * total)/100
+    tax = (2 * total) / 100
     grand_total = total + tax
-    print(current_user)
+
     if request.method == 'POST':
         form = OrderForm(request.POST)
         if form.is_valid():
@@ -123,29 +135,42 @@ def place_order(request, total=0, quantity=0,):
             form.instance.tax = tax
             form.instance.ip = request.META.get('REMOTE_ADDR')
             saved_instance = form.save()  # Save the form data to the database
-            saved_instance_id = saved_instance.id 
+            saved_instance_id = saved_instance.id
+
             # Generate order number
             yr = int(datetime.date.today().strftime('%Y'))
             dt = int(datetime.date.today().strftime('%d'))
             mt = int(datetime.date.today().strftime('%m'))
-            d = datetime.date(yr,mt,dt)
+            d = datetime.date(yr, mt, dt)
             current_date = d.strftime("%Y%m%d")
             order_number = current_date + str(saved_instance_id)
             form.instance.order_number = order_number
             form.save()
-            print("order number indeis ", order_number)
-            order = Order.objects.get(user=current_user, is_ordered=False, order_number=order_number)
-            context = {
-                'order': order,
-                'cart_items': cart_items,
-                'total': total,
-                'tax': tax,
-                'grand_total': grand_total,
-            }
-            return redirect(sslcommerz_payment_gateway(request,order_number, str(current_user.id), grand_total, form.instance.email))
-         
-    else:
-        return render(request, 'orders/payments.html')
+
+            # Get the saved order
+            order = Order.objects.get(
+                user=current_user, is_ordered=False, order_number=order_number)
+
+            # Check the selected payment method
+            payment_method = request.POST.get('payment_method', 'Card')
+
+            if payment_method == 'COD':
+                # Cash on Delivery logic
+                order.payment_method = 'COD'
+                order.is_paid = False  # Mark as unpaid
+                order.save()
+
+                # Clear the user's cart
+                CartItem.objects.filter(user=current_user).delete()
+
+                # Redirect to a COD success page
+                return redirect('cod_success')  # Create this success page
+
+            else:
+                # Proceed to SSLCommerz for card payment
+                return redirect(sslcommerz_payment_gateway(request, order_number, str(current_user.id), grand_total, form.instance.email))
+
+    return render(request, 'orders/payments.html')
 
 
 def order_complete(request):
