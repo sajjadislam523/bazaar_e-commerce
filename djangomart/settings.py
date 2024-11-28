@@ -13,10 +13,11 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from django.contrib.messages import constants as messages
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+load_dotenv(BASE_DIR/ ".env")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -27,7 +28,7 @@ SECRET_KEY = 'django-insecure-ar!(jw!5zd^+s37#jbniss50c+z2u6!1t*#0a2%37cwz3i$@0a
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['.railway.app']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.railway.app']
 
 
 # Application definition
@@ -144,8 +145,8 @@ MESSAGE_TAGS = {
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'phitrondjangotutorials@gmail.com'
-EMAIL_HOST_PASSWORD = "gfstyipgdbhawvgt"
+EMAIL_HOST_USER = os.getenv("ADMIN_EMAIL", default="")
+EMAIL_HOST_PASSWORD = os.getenv("ADMIN_PASSWORD", default="")
 EMAIL_USE_TLS = True
 
 # Update with production URL for live environment
