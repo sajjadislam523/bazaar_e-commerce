@@ -26,10 +26,9 @@ load_dotenv(BASE_DIR/ ".env")
 SECRET_KEY = 'django-insecure-ar!(jw!5zd^+s37#jbniss50c+z2u6!1t*#0a2%37cwz3i$@0a'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.railway.app']
-
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -129,7 +128,6 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 # Default primary key field type
