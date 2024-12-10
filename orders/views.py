@@ -161,8 +161,6 @@ def place_order(request, total=0, quantity=0):
                 # Clear the user's cart
                 CartItem.objects.filter(user=current_user).delete()
 
-                # Redirect to a COD success page
-                return redirect('cod_success')  # Create this success page
 
             else:
                 # Proceed to SSLCommerz for card payment

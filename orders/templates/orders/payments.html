@@ -53,10 +53,12 @@
 								<tr>
 									<td>
 										<figure class="itemside align-items-center">
-											<div class="aside"><img src="{{ cart_item.product.images.url }}" class="img-sm"></div>
+											<div class="aside"><img src="{{ cart_item.product.images.url }}"
+													class="img-sm"></div>
 											<figcaption class="info">
-												<a href="{{ cart_item.product.get_url }}" class="title text-dark">{{ cart_item.product.product_name }}</a>
-												
+												<a href="{{ cart_item.product.get_url }}" class="title text-dark">{{
+													cart_item.product.product_name }}</a>
+
 											</figcaption>
 										</figure>
 									</td>
@@ -99,20 +101,20 @@
 						</dl>
 						<hr>
 						<p class="text-center mb-3">
-							<img style="width:300px;height:auto;" src="https://securepay.sslcommerz.com/public/image/SSLCommerz-Pay-With-logo-All-Size-05.png" />
+							<img style="width:300px;height:auto;"
+								src="https://securepay.sslcommerz.com/public/image/SSLCommerz-Pay-With-logo-All-Size-05.png" />
 						</p>
 
 
-						<div >
+						<div>
 							<!-- PayPal Button Will Load -->
 							<a href="{% url 'payments' %}" class="btn btn-primary">Make Payment</a>
 						</div>
-						<button class="your-button-class" id="sslczPayBtn"
-		 token="if you have any token validation"
-		 postdata="your javascript arrays or objects which requires in backend"
-		 order="If you already have the transaction generated for current order"
-		 endpoint="An URL where backend code will initiate the payment to SSLCOMMERZ"> Pay Now
-</button>
+						<button class="your-button-class" id="sslczPayBtn" token="if you have any token validation"
+							postdata="your javascript arrays or objects which requires in backend"
+							order="If you already have the transaction generated for current order"
+							endpoint="An URL where backend code will initiate the payment to SSLCOMMERZ"> Pay Now
+						</button>
 
 					</div> <!-- card-body.// -->
 				</div> <!-- card.// -->
@@ -130,15 +132,15 @@
 
 <script>
 
-(function (window, document) {
-	var loader = function () {
-		var script = document.createElement("script"), tag = document.getElementsByTagName("script")[0];
-		script.src = "https://seamless-epay.sslcommerz.com/embed.min.js?" + Math.random().toString(36).substring(7);
-		tag.parentNode.insertBefore(script, tag);
-	};
+	(function (window, document) {
+		var loader = function () {
+			var script = document.createElement("script"), tag = document.getElementsByTagName("script")[0];
+			script.src = "https://seamless-epay.sslcommerz.com/embed.min.js?" + Math.random().toString(36).substring(7);
+			tag.parentNode.insertBefore(script, tag);
+		};
 
-	window.addEventListener ? window.addEventListener("load", loader, false) : window.attachEvent("onload", loader);
-})(window, document);
+		window.addEventListener ? window.addEventListener("load", loader, false) : window.attachEvent("onload", loader);
+	})(window, document);
 </script>
 
 {% endblock %}
